@@ -1,0 +1,112 @@
+<html ng-app="desafioAngular">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Desafio Accenture - Isabella Cacélia Vicente</title>
+		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="css/font-awesome.css">
+		<script src="js/angular.js"></script>
+		<script src="js/angular-messages.js"></script>
+
+		<script>
+			angular.module("desafioAngular", ["ngMessages"]);
+			angular.module("desafioAngular").controller("desafioAngularCtrl", function($scope, $http) {
+				$scope.dados = [];
+				$scope.genero = [
+					{sexo: "Masculino", icone: "mars"},
+					{sexo: "Feminino", icone: "venus"}
+				];
+				var carregarDados = function() {
+					$http.get("js/data.json").then( function(data) {
+						$scope.dados = data.data;
+					});
+				};
+				$scope.adicionarDados = function(dadosForm) {
+					dadosForm.icone = dadosForm.sexo;
+					$scope.dados.push(angular.copy(dadosForm));
+					//delete $scope.dados;
+					$scope.formAdd.$setPristine();
+					$scope.showForm = false;
+				};
+				$scope.cancelarDados = function(dadosForm) {
+					delete $scope.dadosForm;
+					$scope.showForm = false;
+				};
+				$scope.ordenar = function(campo){
+					$scope.campoBusca = "";
+					$scope.criterioDeOrdenacao = campo;
+					$scope.direcaoDaOrdenacao = !$scope.direcaoDaOrdenacao;
+				};
+
+				carregarDados();
+			});
+		</script>
+	</head>
+	<body class="container" ng-controller="desafioAngularCtrl">
+	<section class="bloco-azul"></section>
+	<main>
+		<div class="row">
+			<div class="col-md-3">
+				<aside>
+					<a class="btn" href="" ng-click="ordenar('nome')">Ordenar nome</a>
+					<a class="btn" href="" ng-click="ordenar('dataNascimento')">Ordenar nascimento</a>
+					<a class="btn" href="" ng-click="campoBusca='Masculino'">Filtro homens</a>
+					<a class="btn" href="" ng-click="campoBusca='Feminino'">Filtro mulheres</a>
+				</aside>
+			</div>
+			<div class="padding-content col-md-9">
+				<input ng-model="campoBusca" class="form-control" type="text" placeholder="Qualquer coisa bacana aqui pra ser buscada :)">
+				<br>
+				<table class="table table-striped table-responsive">
+					<tr>
+						<th>Nome</th>
+						<th>Dt Nascimento</th>
+						<th>Sexo</th>
+					</tr>
+					<tr ng-repeat="dadosForm in dados | filter:campoBusca | orderBy:criterioDeOrdenacao:direcaoDaOrdenacao">
+						<td>{{dadosForm.nome}}</td>
+						<td>{{dadosForm.dataNascimento | date: 'yyyy/MM/dd'}}</td>
+						<td><i class='fa fa-{{dadosForm.icone}}' aria-hidden='true'></i></td>
+					</tr>
+				</table>
+				<div class="text-right">
+					<button class="btn-add" ng-click="showForm=true"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Adicionar</button>
+				</div>
+				<br>
+				<section class="fundo-cinza" ng-show="showForm">
+					<form name="formAdd">
+						<div class="row">
+							<div class="col-md-12">
+								<label>Nome</label>
+								<input class="form-control" name="nome" type="text" ng-model="dadosForm.nome" ng-required="true" ng-minlength="5">
+							</div>
+						</div>
+						<br>
+						<div class="row">
+							<div class="col-md-3">
+								<label>Dt Nascimento</label>
+								<input ng-required="true" name="dataNascimento" ng-model="dadosForm.dataNascimento" class="form-control" type="date">
+							</div>
+							<div class="col-md-3">
+								<label>Sexo</label>
+								<select ng-required="true" ng-model="dadosForm.sexo" class="form-control">
+									<option value="" disabled>Selecione uma opção</option>
+									<option ng-repeat="g in genero" value="{{g.icone}}">{{g.sexo}}</option>
+								</select>
+							</div>
+							<br>
+							<div class="button-center col-md-6">
+								<button class="btn-cancel" type="reset" ng-click="cancelarDados(dadosForm)">Cancelar</button>
+								<button class="btn-add" type="reset" ng-click="adicionarDados(dadosForm)" ng-disabled="formAdd.$invalid">Salvar</button>
+							</div>
+						</div>
+					</form>					
+				</section>
+			</div>
+		</div>
+	</main>
+	<footer>
+		<p class="text-center">Desenvolvido por <a target="_blank" href="https://people.accenture.com/isabellacacelia">Isabella Cacélia</a></p>
+	</footer>
+</body>
+</html>
